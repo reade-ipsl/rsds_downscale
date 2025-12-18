@@ -24,6 +24,7 @@ See python code in downscale_ts
 * pytorch https://pytorch.org/ (BSD-3 license)
 * pysolar https://github.com/pingswept/pysolar/ (GPL-3.0 license)
 * see python code for other python needs
+* SARAH-3 Data https://wui.cmsaf.eu/safira/action/viewDoiDetails?acronym=SARAH_V003
 
 # License:
 CC BY 4.0
