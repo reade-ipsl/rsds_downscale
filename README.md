@@ -21,9 +21,9 @@ See python code in downscale_ts
 * rsdsMain_ObsPredictionLOOPs.py Trains the ML model multiple times and outputs a summary of the performance so ML model can be tuned with respect to the loss function, batch size etc. (tables of metrics and plots of example output). *.com files provided to concatenate/montage output across differently tuned ML models.
 
 # Requirements:
-pytorch https://pytorch.org/ (BSD-3 license)
-pysolar https://github.com/pingswept/pysolar/ (GPL-3.0 license)
-see python code for other python needs
+* pytorch https://pytorch.org/ (BSD-3 license)
+* pysolar https://github.com/pingswept/pysolar/ (GPL-3.0 license)
+* see python code for other python needs
 
 # License:
 CC BY 4.0
