@@ -704,7 +704,7 @@ def main():
         end_date=datetime.datetime(yrpred, 12, 31, 23, 30)
         date_list = pd.date_range(start_date, end_date, freq='30min')
         yrpred_len=365
-        if calendar.isleap(yrpred_len): yrpred_len=366
+        if calendar.isleap(yrpred): yrpred_len=366
 
         TOTtarget=OBSyPR_targetTOT_wm2[yearP_LenList0[ycount]:yearP_LenList1[ycount],:].reshape(yrpred_len*48)
         dataset = pd.DataFrame({'SIS': TOTtarget}, index=date_list)
