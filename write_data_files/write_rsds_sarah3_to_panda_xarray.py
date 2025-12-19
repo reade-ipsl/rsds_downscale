@@ -12,8 +12,8 @@ Run by typing:
 module purge
 module load python/meso-3.11  # example module to load python environment
 pip install pysolar
-python -i write_rsds_sarah3_to_panda_xarray.py 'SIS' 'France' 2023
-python write_rsds_sarah3_to_panda_xarray.py 'SIS' 'France' 2014
+python -i write_data_files/write_rsds_sarah3_to_panda_xarray.py 'SIS' 'France' 2018
+python write_data_files/write_rsds_sarah3_to_panda_xarray.py 'SIS' 'France' 2014
 
 Or use a script to submit, e.g.
 run_write_rsds_sarah3_to_panda_xarray.bash
@@ -97,6 +97,7 @@ print(now.time())
 print("--------------")
 
 import os, sys, glob
+from pathlib import Path
 import numpy as np
 import pandas as pd
 import xarray as xr
@@ -109,10 +110,10 @@ import pdb # used for checking code part way through
 # ----------------------------------------------------------------------------
 
 # DIRECTORY For Output
-output_dir='data/sarah3obs_subdaily_ts/'
+output_dir=Path('data/sarah3obs_subdaily_tsT/')
 if not os.path.exists(output_dir): os.makedirs(output_dir)
 
- -------------------------------------------------------------------#
+# -------------------------------------------------------------------#
 def get_directory(year=2018, rsdsType='SIS'):
     """
     Write code here to identify directories containing SARAH-3 data
@@ -123,14 +124,14 @@ def get_directory(year=2018, rsdsType='SIS'):
     """
     
     # Data paths for SIS and SID Data (SARAH-3)
-    sarah3_dir_30MIN='../data/sarah3nc/inst/'
-    if rsdsType=='SID': sarah3_dir_30MIN='../data/sarah3nc/instDir/'
+    sarah3_dir_30MIN=Path('data/sarah3nc/inst/')
+    if rsdsType=='SID': sarah3_dir_30MIN=Path('data/sarah3nc/instDir/')
     
     #if year < 2019 and rsdsType=='SIS': sarah3_dir_30MIN='' # <2019
     #if year < 2019 and rsdsType=='SID': sarah3_dir_30MIN='' # <2019
 
     # Ancillary File For Datetime info (offset due to satellite motion)
-    sarah3_file_30MIN_ancil='../data/sarah3nc/ancil/AuxilaryData_SARAH-3.nc'
+    sarah3_file_30MIN_ancil=Path('data/sarah3nc/ancil/AuxilaryData_SARAH-3.nc')
 
     return sarah3_dir_30MIN, sarah3_file_30MIN_ancil
 
@@ -205,25 +206,30 @@ def fn_read_one_date_sarah3_30MIN_np_xr(year=2019, mon=1, day=1, latIN=48.709999
     print(date_code)
     
     # Build file path
-    fpath = sarah3_dir_30MIN + rsdsType + 'in' + str(year) + date_code + '*MA.nc'
+    fpath = sarah3_dir_30MIN / Path(rsdsType + 'in' + str(year) + date_code + '*MA.nc')
     
     # Special case for corrupt data files (all data missing, only checked 2013-2024)
     if year == 2014 and mon == 12 and day == 2: 
-        fpath = sarah3_dir_30MIN + rsdsType + 'in20141201*MA.nc'
+        fpath = sarah3_dir_30MIN / Path(rsdsType + 'in20141201*MA.nc')
     if year == 2014 and mon == 12 and day == 3: 
-        fpath = sarah3_dir_30MIN + rsdsType + 'in20141204*MA.nc'
+        fpath = sarah3_dir_30MIN / Path(rsdsType + 'in20141204*MA.nc')
     if year == 2016 and mon == 10 and day == 15: 
-        fpath = sarah3_dir_30MIN + rsdsType + 'in20161013*MA.nc'
+        fpath = sarah3_dir_30MIN / Path(rsdsType + 'in20161013*MA.nc')
     if year == 2016 and mon == 10 and day == 16: 
-        fpath = sarah3_dir_30MIN + rsdsType + 'in20161014*MA.nc'
+        fpath = sarah3_dir_30MIN / Path(rsdsType + 'in20161014*MA.nc')
     if year == 2016 and mon == 10 and day == 17: 
-        fpath = sarah3_dir_30MIN + rsdsType + 'in20161018*MA.nc'
+        fpath = sarah3_dir_30MIN / Path(rsdsType + 'in20161018*MA.nc')
 	   
 
     # Get file list (should be just 1 file)
-    file_list = glob.glob(fpath)
+    #file_list = glob.glob(fpath) # doesn't work with Path
+    parent_dir = fpath.parent if fpath.parent.exists() else Path('.')
+    pattern = fpath.name
+    file_list = list(parent_dir.glob(pattern))
+
     if not file_list:
         raise FileNotFoundError(f"No files found matching pattern: {fpath}")
+    print(file_list)
     
     # First pass: find lat/lon indices using the first file (without loading data)
     with xr.open_dataset(file_list[0]) as ds:
@@ -367,22 +373,25 @@ def fn_read_one_date_spavg_sarah3_30MIN_np_xr(year=2019, mon=1, day=1, latIN=[47
     print(date_code)
     
     # Build file path
-    fpath = sarah3_dir_30MIN + rsdsType + 'in' + str(year) + date_code + '*MA.nc'
+    fpath = sarah3_dir_30MIN / Path(rsdsType + 'in' + str(year) + date_code + '*MA.nc')
     
     # Special case for corrupt data files (all data missing, only checked 2013-2024)
     if year == 2014 and mon == 12 and day == 2: 
-        fpath = sarah3_dir_30MIN + rsdsType + 'in20141201*MA.nc'
+        fpath = sarah3_dir_30MIN / Path(rsdsType + 'in20141201*MA.nc')
     if year == 2014 and mon == 12 and day == 3: 
-        fpath = sarah3_dir_30MIN + rsdsType + 'in20141204*MA.nc'
+        fpath = sarah3_dir_30MIN / Path(rsdsType + 'in20141204*MA.nc')
     if year == 2016 and mon == 10 and day == 15: 
-        fpath = sarah3_dir_30MIN + rsdsType + 'in20161013*MA.nc'
+        fpath = sarah3_dir_30MIN / Path(rsdsType + 'in20161013*MA.nc')
     if year == 2016 and mon == 10 and day == 16: 
-        fpath = sarah3_dir_30MIN + rsdsType + 'in20161014*MA.nc'
+        fpath = sarah3_dir_30MIN / Path(rsdsType + 'in20161014*MA.nc')
     if year == 2016 and mon == 10 and day == 17: 
-        fpath = sarah3_dir_30MIN + rsdsType + 'in20161018*MA.nc'
+        fpath = sarah3_dir_30MIN / Path(rsdsType + 'in20161018*MA.nc')
     
     # Get file list (should be just 1 file)
-    files = glob.glob(fpath)
+    #files = glob.glob(fpath) # doesn't work with Path
+    parent_dir = fpath.parent if fpath.parent.exists() else Path('.')
+    pattern = fpath.name
+    files = list(parent_dir.glob(pattern))
     if not files:
         raise FileNotFoundError(f"No files found matching pattern: {fpath}")
     
@@ -642,14 +651,14 @@ def main():
     site_name = str(sys.argv[2]) # 'France' 'Senegal'
     yearS = int(sys.argv[3]) # 2018
     
-    TEST_EXAMPLE=False # True => test on just 1 day of data
+    TEST_EXAMPLE=True # False # True => test on just 1 day of data
     
     print(site_name)
     print(yearS)
     print(rsdsType)
     
     # Define output directory
-    fdir=output_dir+site_name+'/'  # Output path for csv data files, see GLOBAL DATA PATHS
+    fdir=output_dir / site_name  # Output path for csv data files, see GLOBAL DATA PATHS
     if not os.path.exists(fdir): os.makedirs(fdir)
     
     site_num, lat_given, lon_given, latRange_given, lonRange_given=get_site_info(site_name=site_name)
@@ -759,12 +768,12 @@ def main():
     # Version with missing data filled by interpolated values
     datetime_1Ddf=pd.to_datetime(np.array(daily_date_list1D))
     dataset = pd.DataFrame({rsdsType: sis_1Dnp, 'Zenith': zen_1Dnp, 'Clearsky': csky_1Dnp}, index=datetime_1Ddf)
-    dataset.to_csv(fdir+'SARAH3_DATE_'+rsdsType+'_30MIN_'+yrS_txt+'_'+site_name+tfn+'.csv', index=True, index_label='time', float_format='%6.1f') # index=False prevents an index column from being added.
+    dataset.to_csv(fdir / Path('SARAH3_DATE_'+rsdsType+'_30MIN_'+yrS_txt+'_'+site_name+tfn+'.csv'), index=True, index_label='time', float_format='%6.1f') # index=False prevents an index column from being added.
 
     # Version with missing data kept in
     sis_1DnpRaw=daily_patterns_orig.reshape(total_days*48)
     dataset2 = pd.DataFrame({rsdsType: sis_1DnpRaw}, index=datetime_1Ddf)
-    dataset2.to_csv(fdir+'SARAH3_DATE_'+rsdsType+'miss_30MIN_'+yrS_txt+'_'+site_name+tfn+'.csv', index=True, index_label='time') # index=False prevents an index column from being added.
+    dataset2.to_csv(fdir / Path('SARAH3_DATE_'+rsdsType+'miss_30MIN_'+yrS_txt+'_'+site_name+tfn+'.csv'), index=True, index_label='time') # index=False prevents an index column from being added.
 
     # -----------------------
     # 3 hourly mean version of data
@@ -792,7 +801,7 @@ def main():
     ZENRAVG_3HR=datasetRAVG2['Zenith'].resample(rule='3h', origin='start').mean()
     CSKYRAVG_3HR=datasetRAVG2['Clearsky'].resample(rule='3h', origin='start').mean()
     dataset3HR = pd.DataFrame({rsdsType: SIS_3HR, 'Zenith': ZENRAVG_3HR, 'Clearsky': CSKYRAVG_3HR}) # , index=datetime_1Ddf)
-    dataset3HR.to_csv(fdir+'SARAH3_DATE_'+rsdsType+'_3HR_IPSLCM6_'+yrS_txt+'_'+site_name+tfn+'.csv', index=True, index_label='time', float_format='%6.1f') # index=False prevents an index column from being added.
+    dataset3HR.to_csv(fdir / Path('SARAH3_DATE_'+rsdsType+'_3HR_IPSLCM6_'+yrS_txt+'_'+site_name+tfn+'.csv'), index=True, index_label='time', float_format='%6.1f') # index=False prevents an index column from being added.
 
 
     #__________________________________
@@ -852,7 +861,7 @@ def main():
     
     datetime_1Ddf=pd.to_datetime(np.array(daily_date_list1D))
     dataset = pd.DataFrame({'Zenith': zen_1Dnp, 'Clearsky': csky_1Dnp}, index=datetime_1Ddf)
-    dataset.to_csv(fdir+'PYSOLAR_DATE_SID_30MIN_'+yrS_txt+'_'+site_name+tfn+'.csv', index=True, index_label='time', float_format='%6.1f') # index=False prevents an index column from being added.
+    dataset.to_csv(fdir / Path('PYSOLAR_DATE_SID_30MIN_'+yrS_txt+'_'+site_name+tfn+'.csv'), index=True, index_label='time', float_format='%6.1f') # index=False prevents an index column from being added.
 
     # -----------------------
     # 3 hourly mean version of data
@@ -874,7 +883,7 @@ def main():
     ZENRAVG_3HR=datasetRAVG2['Zenith'].resample(rule='3h', origin='start').mean()
     CSKYRAVG_3HR=datasetRAVG2['Clearsky'].resample(rule='3h', origin='start').mean()
     dataset3HR = pd.DataFrame({'Zenith': ZENRAVG_3HR, 'Clearsky': CSKYRAVG_3HR}) # , index=datetime_1Ddf)
-    dataset3HR.to_csv(fdir+'PYSOLAR_DATE_SID_3HR_IPSLCM6_'+yrS_txt+'_'+site_name+tfn+'.csv', index=True, index_label='time', float_format='%6.1f') # index=False prevents an index column from being added.
+    dataset3HR.to_csv(fdir / Path('PYSOLAR_DATE_SID_3HR_IPSLCM6_'+yrS_txt+'_'+site_name+tfn+'.csv'), index=True, index_label='time', float_format='%6.1f') # index=False prevents an index column from being added.
 
     print('----LAT LON----')
     print(site_name)
@@ -889,10 +898,10 @@ def main():
     print('---------------')
     
     #Check output csv files
-    #readData=pd.read_csv(fdir+'SARAH3_DATE_SIS_30MIN_'+yrS_txt+'_'+site_name+tfn+'.csv')
-    #readData=pd.read_csv(fdir+'SARAH3_DATE_SIS_3HRto30min_'+yrS_txt+'_'+site_name+tfn+'.csv')
-    #readData=pd.read_csv(fdir+'SARAH3_DATE_SID_30MIN_'+yrS_txt+'_'+site_name+tfn+'.csv')
-    #readData=pd.read_csv(fdir+'SARAH3_DATE_SID_3HRto30min_'+yrS_txt+'_'+site_name+tfn+'.csv') 
+    #readData=pd.read_csv(fdir / Path('SARAH3_DATE_SIS_30MIN_'+yrS_txt+'_'+site_name+tfn+'.csv'))
+    #readData=pd.read_csv(fdir / Path('SARAH3_DATE_SIS_3HRto30min_'+yrS_txt+'_'+site_name+tfn+'.csv'))
+    #readData=pd.read_csv(fdir / Path('SARAH3_DATE_SID_30MIN_'+yrS_txt+'_'+site_name+tfn+'.csv'))
+    #readData=pd.read_csv(fdir / Path('SARAH3_DATE_SID_3HRto30min_'+yrS_txt+'_'+site_name+tfn+'.csv'))
 
 #    pdb.set_trace()
 
