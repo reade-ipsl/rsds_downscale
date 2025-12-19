@@ -110,7 +110,7 @@ import pdb # used for checking code part way through
 # ----------------------------------------------------------------------------
 
 # DIRECTORY For Output
-output_dir=Path('data/sarah3obs_subdaily_tsT/')
+output_dir=Path('data/sarah3obs_subdaily_ts/')
 if not os.path.exists(output_dir): os.makedirs(output_dir)
 
 # -------------------------------------------------------------------#
@@ -651,7 +651,7 @@ def main():
     site_name = str(sys.argv[2]) # 'France' 'Senegal'
     yearS = int(sys.argv[3]) # 2018
     
-    TEST_EXAMPLE=True # False # True => test on just 1 day of data
+    TEST_EXAMPLE=False # True => test on just 1 day of data
     
     print(site_name)
     print(yearS)
