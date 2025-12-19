@@ -10,6 +10,7 @@ python rsdsMain_ObsPrediction.py
 
 """
 
+from pathlib import Path
 import pandas as pd
 import numpy as np
 import scipy as sp
@@ -21,7 +22,7 @@ import pdb
 # GLOBAL DATA PATHS
 # ----------------------------------------------------------------------------
 # DIRECTORY For input data
-cSARdir='data/sarah3obs_subdaily_ts/'       # Obs Data better: 3Hr mean = e.g. France [00:40 to 03:10] chosen so close to GCM [00:30 to 03:00]
+cSARdir=Path('data/sarah3obs_subdaily_ts/')       # Obs Data better: 3Hr mean = e.g. France [00:40 to 03:10] chosen so close to GCM [00:30 to 03:00]
 
 # ----------------------------------------------------------------------------
 # DATA PREPARATION FUNCTIONS FOR ML MODELS
@@ -510,7 +511,8 @@ def fn_get_rawinput_data(year_list=[2000], site_list=['France'], dataset='SARAH3
         num_days_tmp=get_yr_length(yearS)    
 
         # Read 3 Hourly irradiance data, Raw data on original timesteps
-        SIS3HR=pd.read_csv(indir3hr+site_name+'/'+fname_start3hr+yearS_txt+'_'+site_name+'.csv')  
+        fullfpath3HR=indir3hr / site_name / Path(fname_start3hr+yearS_txt+'_'+site_name+'.csv')
+        SIS3HR=pd.read_csv(fullfpath3HR)
         SIS3HR["time"] = pd.to_datetime(SIS3HR["time"])
         for dd in range(num_days_tmp): x_shortTOTAL[dd+SampleStart,:] = SIS3HR[[var_key]].values[(dd*daylen_short):(dd*daylen_short+daylen_short),0] # Use 3HR input file (not version where repeated 30min steps)
         for dd in range(num_days_tmp): x_shortCSKYDIR[dd+SampleStart,:] = SIS3HR[['Clearsky']].values[(dd*daylen_short):(dd*daylen_short+daylen_short),0] # Use 3HR input file where mean already computed
@@ -524,7 +526,9 @@ def fn_get_rawinput_data(year_list=[2000], site_list=['France'], dataset='SARAH3
         if ycount==(num_years-1): x_short_timestamps_nLeap=pd.to_datetime(SIS3HRnLeap['time'])
 
         # Read 3 Hourly clearsky direct data estimated by pysolar, Raw data on  Standard timesteps
-        if dataset=='SARAH3' or dataset=='SARAH3sh0010': CSKYDIR3HR=pd.read_csv(indir3hr+site_name+'/'+pysolar_start3hr+yearS_txt+'_'+site_name+'.csv')  
+        if dataset=='SARAH3' or dataset=='SARAH3sh0010':
+            fullfpathC3HR=indir3hr / site_name / Path(pysolar_start3hr+yearS_txt+'_'+site_name+'.csv')
+            CSKYDIR3HR=pd.read_csv(fullfpathC3HR)  
         if dataset=='IPSL-CM6A-LR_r1': CSKYDIR3HR=SIS3HR.copy()
         CSKYDIR3HRnLeap=CSKYDIR3HR.copy()
         if num_days_tmp==366: maskS=CSKYDIR3HR['time'].between(yearS_txt+'-02-29 00:00:00+00:00', yearS_txt+'-02-29 23:59:59+00:00')
@@ -533,7 +537,8 @@ def fn_get_rawinput_data(year_list=[2000], site_list=['France'], dataset='SARAH3
         if ycount==(num_years-1): xST_short_timestamps_nLeap=pd.to_datetime(CSKYDIR3HRnLeap['time'])
 
         # Read 30 Minute clearsky direct data estimated by pysolar, Raw data on  Standard timesteps
-        SIS30MIN=pd.read_csv(indir30min+site_name+'/'+fname_start30min+yearS_txt+'_'+site_name+'.csv')
+        fullfpath30MIN=indir30min / site_name / Path(fname_start30min+yearS_txt+'_'+site_name+'.csv')
+        SIS30MIN=pd.read_csv(fullfpath30MIN)
         SIS30MIN["time"] = pd.to_datetime(SIS30MIN["time"])
         for dd in range(num_days_tmp): x_longCSKYDIR[dd+SampleStart,:] = SIS30MIN[['Clearsky']].values[(dd*daylen_long):(dd*daylen_long+daylen_long),0]
 
@@ -658,12 +663,14 @@ def fn_get_rawtarget_data(year_list=[2000], site_list=['France'], dataset='SARAH
         num_days_tmp=get_yr_length(yearS)
 
         # Read 30 min irradiance data, Raw data on original timesteps
-        SIS30MIN=pd.read_csv(indir30min+site_name+'/'+fname_start30min+yearS_txt+'_'+site_name+'.csv')
+        fullfpath30MIN=indir30min / site_name / Path(fname_start30min+yearS_txt+'_'+site_name+'.csv')
+        SIS30MIN=pd.read_csv(fullfpath30MIN)
         SIS30MIN["time"] = pd.to_datetime(SIS30MIN["time"])
         if variable2=='SIS':
             SID30MIN=SIS30MIN.copy()
         if variable2!='SIS':
-            SID30MIN=pd.read_csv(indir30min2+site_name+'/'+fname_start30min2+yearS_txt+'_'+site_name+'.csv')
+            fullfpath30MIN2=indir30min2 / site_name / Path(fname_start30min2+yearS_txt+'_'+site_name+'.csv')
+            SID30MIN=pd.read_csv(fullfpath30MIN2)
         SID30MIN["time"] = pd.to_datetime(SID30MIN["time"])
         for dd in range(num_days_tmp): y_targetTOTAL[dd+SampleStart,:] = SIS30MIN[['SIS']].values[(dd*daylen_long):(dd*daylen_long+daylen_long),0]
         for dd in range(num_days_tmp): y_targetDIRECT[dd+SampleStart,:] = SID30MIN[[var_key2]].values[(dd*daylen_long):(dd*daylen_long+daylen_long),0]
@@ -677,7 +684,9 @@ def fn_get_rawtarget_data(year_list=[2000], site_list=['France'], dataset='SARAH
         if ycount==(num_years-1): y_target_timestamps_nLeap=pd.to_datetime(SIS30MINnLeap['time'])
 
         # Reade 30 min clearsky direct estimated by pysolar, Raw data on  Standard timesteps
-        if dataset=='SARAH3' or dataset=='SARAH3sh0010': ST_SIS30MIN=pd.read_csv(indir30min3+site_name+'/'+fname_start30min3+yearS_txt+'_'+site_name+'.csv')
+        if dataset=='SARAH3' or dataset=='SARAH3sh0010': 
+            fullfpath30MINst=indir30min3 / site_name / Path(fname_start30min3+yearS_txt+'_'+site_name+'.csv')
+            ST_SIS30MIN=pd.read_csv(fullfpath30MINst)
         if dataset=='IPSL-CM6A-LR_r1': ST_SIS30MIN=SIS30MIN.copy()
         ST_SIS30MINnLeap=ST_SIS30MIN.copy()
         if num_days_tmp==366: maskS=ST_SIS30MIN['time'].between(yearS_txt+'-02-29 00:00:00+00:00', yearS_txt+'-02-29 23:59:59+00:00')

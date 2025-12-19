@@ -137,6 +137,7 @@ print("--------------")
 
 import sys
 import os
+from pathlib import Path
 import importlib
 import pandas as pd
 import numpy as np
@@ -167,7 +168,7 @@ import rsds_performance_metrics as rspm # PERFORMANCE METRIC FUNCTIONS
 # ----------------------------------------------------------------------------
 
 # DIRECTORY For Output Plots 
-OUT_DIR='results/rsds_ObsPredictionLOOPs/'
+OUT_DIR=Path('results/rsds_ObsPredictionLOOPs/')
 
 # ----------------------------------------------------------------------------
 def seed_worker(worker_id):
@@ -235,7 +236,7 @@ def main():
     SIDvar='SID'
 
     # LOOP over ML model fits
-    nLOOP=10 # Test just 1 Model but fit multiple versions (sampling uncertainty within ML model fits)
+    nLOOP=3 # 10 # Test just 1 Model but fit multiple versions (sampling uncertainty within ML model fits)
 
     # _____________________________________________________
     # Parameters for training the ML model    
@@ -249,12 +250,12 @@ def main():
     bsize_txt='B'+str(batch_size) # bsize_txt+wlist_txt
 
     # Setup Output Directories
-    pdir = OUT_DIR + 'test'+str(train_test_case)+'_'+ model_name_list1 + '_' + bsize_txt + wlist_txt + '/' + location1  + '/'
+    pdir = OUT_DIR / Path( 'test'+str(train_test_case)+'_'+ model_name_list1 + '_' + bsize_txt + wlist_txt + '/' + location1  + '/')
     # Make directories if don't already exist
     if not os.path.exists(pdir): os.makedirs(pdir)
-    if not os.path.exists(pdir+'LossFn/'): os.makedirs(pdir+'LossFn/')
-    if not os.path.exists(pdir+'MLmodel/'): os.makedirs(pdir+'MLmodel/')
-    if not os.path.exists(pdir+'Examples/'): os.makedirs(pdir+'Examples/')
+    if not os.path.exists(pdir / Path('LossFn')): os.makedirs(pdir / Path('LossFn/'))
+    if not os.path.exists(pdir / Path('MLmodel/')): os.makedirs(pdir / Path('MLmodel/'))
+    if not os.path.exists(pdir / Path('Examples/')): os.makedirs(pdir / Path('Examples/'))
 
    
     # CHOOSE 1 Model to test
@@ -558,16 +559,16 @@ def main():
         # ============
 
         # Plot Loss Functions (separately and average of MSE for Total and MSE for Direct)
-        filename=pdir+'LossFn/'+'rsds'+fsetup_txt+'_ML'+model_name_list[mcount]+'_LossFn'+pnum_list[mcount]
-        plot_loss(loss_out[0:2,:], filepath=filename+'.png')
-        filename=pdir+'LossFn/'+'rsdsTOT'+fsetup_txt+'_ML'+model_name_list[mcount]+'_LossFn'+pnum_list[mcount]
-        plot_loss(loss_out[2:4,:], filepath=filename+'.png')
-        filename=pdir+'LossFn/'+'rsdsDIR'+fsetup_txt+'_ML'+model_name_list[mcount]+'_LossFn'+pnum_list[mcount]
-        plot_loss(loss_out[4:6,:], filepath=filename+'.png')
+        filename=pdir / 'LossFn' / Path('rsds'+fsetup_txt+'_ML'+model_name_list[mcount]+'_LossFn'+pnum_list[mcount]+'.png')
+        plot_loss(loss_out[0:2,:], filepath=filename)
+        filename=pdir / 'LossFn' / Path('rsdsTOT'+fsetup_txt+'_ML'+model_name_list[mcount]+'_LossFn'+pnum_list[mcount]+'.png')
+        plot_loss(loss_out[2:4,:], filepath=filename)
+        filename=pdir / 'LossFn' / Path('rsdsDIR'+fsetup_txt+'_ML'+model_name_list[mcount]+'_LossFn'+pnum_list[mcount]+'.png')
+        plot_loss(loss_out[4:6,:], filepath=filename)
 
         # Save ML Model
-        filename=pdir+'MLmodel/'+'rsdsDIR'+fsetup_txt+'_ML'+model_name_list[mcount]+'_model'+pnum_list[mcount]
-        if save_model: torch.save(trained_model.state_dict(), filename+'.pth') # Optional: save the model
+        filename=pdir / 'MLmodel' / Path('rsdsDIR'+fsetup_txt+'_ML'+model_name_list[mcount]+'_model'+pnum_list[mcount]+'.pth')
+        if save_model: torch.save(trained_model.state_dict(), filename) # Optional: save the model
 
         ## To look at weights of model, pause here and output:
 	# pdb.set_trace()
@@ -612,7 +613,7 @@ def main():
     RMSE_ML_PR_TOT=np.zeros(NO_MLmodels)
     # TOTAL
     #-------------------------
-    filename=pdir+'rsdsTOT'+fsetup_txt+'_TR_LossFn_TRPR_RMSE.txt'
+    filename=pdir / Path('rsdsTOT'+fsetup_txt+'_TR_LossFn_TRPR_RMSE.txt')
     f = open(filename, 'w')
     col_heads='                 TR Loss   TR RMSE   PR RMSE'
     f.write(col_heads),
@@ -652,7 +653,7 @@ def main():
     RMSE_ML_TR_DIR=np.zeros(NO_MLmodels)
     RMSE_ML_PR_DIR=np.zeros(NO_MLmodels)
     #-------------------------
-    filename=pdir+'rsdsDIR'+fsetup_txt+'_TR_LossFn_TRPR_RMSE.txt'
+    filename=pdir / Path('rsdsDIR'+fsetup_txt+'_TR_LossFn_TRPR_RMSE.txt')
     f = open(filename, 'w')
     col_heads='                 TR Loss   TR RMSE   PR RMSE'
     f.write(col_heads),
@@ -790,7 +791,7 @@ def main():
     TOT_LIST1.append(rsdsTOT_DSD_WD)
 
     # Write to text file
-    filename=pdir+'rsdsTOT'+fsetup_txt+'_PR_PerfMetricsMN.txt'
+    filename=pdir / Path('rsdsTOT'+fsetup_txt+'_PR_PerfMetricsMN.txt')
     f = open(filename, 'w')
     # Col Headings
     f.write("%20s" % ''),
@@ -807,7 +808,7 @@ def main():
     if NO_MLmodels>2: 
         row_npa=np.arange(len(RowHeadingListSD))
         row_npa[-1]=row_npa[-1]+1
-        filename=pdir+'rsdsTOT'+fsetup_txt+'_PR_PerfMetricsSD.txt'
+        filename=pdir / Path('rsdsTOT'+fsetup_txt+'_PR_PerfMetricsSD.txt')
         f = open(filename, 'w')
         # Col Headings
         f.write("%20s" % ''),
@@ -878,7 +879,7 @@ def main():
     DIR_LIST1.append(rsdsDIR_DSD_WD)
 
     # Write to text file
-    filename=pdir+'rsdsDIR'+fsetup_txt+'_PR_PerfMetricsMN.txt'
+    filename=pdir / Path('rsdsDIR'+fsetup_txt+'_PR_PerfMetricsMN.txt')
     f = open(filename, 'w')
     # Col Headings
     f.write("%20s" % ''),
@@ -895,7 +896,7 @@ def main():
     if NO_MLmodels>2: 
         row_npa=np.arange(len(RowHeadingListSD))
         row_npa[-1]=row_npa[-1]+1
-        filename=pdir+'rsdsDIR'+fsetup_txt+'_PR_PerfMetricsSD.txt'
+        filename=pdir / Path('rsdsDIR'+fsetup_txt+'_PR_PerfMetricsSD.txt')
         f = open(filename, 'w')
         # Col Headings
         f.write("%20s" % ''),
@@ -936,7 +937,7 @@ def main():
     FIGHEIGHT=6
 
     # -----------------------------------------------------
-    filename=pdir+'rsdsTOT_30MIN'+fsetup_txt+'_PR_mlr56_B5SUBsampleMEANCSKY_DAYtsMN'
+    filename=pdir / Path('rsdsTOT_30MIN'+fsetup_txt+'_PR_mlr56_B5SUBsampleMEANCSKY_DAYtsMN.png')
     fig, ax = plt.subplots(figsize=(FIGWIDTH,FIGHEIGHT), layout='constrained')
     ax.plot(ST_OBSyTR30MIN_rsds_total_max_est[0].mean(axis=1), color='black', label='OBS Smoothed')
     ax.plot(ST_OBSyPR_targetTOTALnLeap_MAX.mean(axis=1), color='gray', label='OBS Target')
@@ -947,7 +948,7 @@ def main():
     plt.xlabel('Day')
     plt.ylabel('RSDS, W/m2')
     ax.set_ylim(bottom=0.0, top=400.0)
-    plt.savefig(filename+'.png') # saves figure to designated file path (do this before show plot, else will plot nothing to file)
+    plt.savefig(filename) # saves figure to designated file path (do this before show plot, else will plot nothing to file)
     plt.close('all') # plt.show()  
 
     # -----------------------------------------------------
@@ -955,7 +956,7 @@ def main():
         OBSpredictionTOT_mltmp_wm2_nLeap=rsdp.fn_remove_29feb_array(OBSpredictionTOT_MLlist_wm2[mcount], yearP_LenList, ntsteps=48)
         OBSpredictionTOT_mltmp_wm2_CMAX=rsdp.fn_compute_timestep_day_max(OBSpredictionTOT_mltmp_wm2_nLeap, num_years=len(yearP_LenList), ntsteps=48, yrlen=365)
 
-        filename=pdir+'rsdsTOT_30MIN'+fsetup_txt+'_PR_ML'+model_name_list[mcount]+pnum_list[mcount]+'_B5SUBsampleMEANCSKY_DAYtsMN'
+        filename=pdir / Path('rsdsTOT_30MIN'+fsetup_txt+'_PR_ML'+model_name_list[mcount]+pnum_list[mcount]+'_B5SUBsampleMEANCSKY_DAYtsMN.png')
         fig, ax = plt.subplots(figsize=(FIGWIDTH,FIGHEIGHT), layout='constrained')
         ax.plot(ST_OBSyTR30MIN_rsds_total_max_est[0].mean(axis=1), color='black', label='OBS Smoothed')
         ax.plot(ST_OBSyPR_targetTOTALnLeap_MAX.mean(axis=1), color='gray', label='OBS Target')
@@ -966,7 +967,7 @@ def main():
         plt.xlabel('Day')
         plt.ylabel('RSDS, W/m2')
         ax.set_ylim(bottom=0.0, top=400.0)
-        plt.savefig(filename+'.png') # saves figure to designated file path (do this before show plot, else will plot nothing to file)
+        plt.savefig(filename) # saves figure to designated file path (do this before show plot, else will plot nothing to file)
         plt.close('all') # plt.show()
     # -----------------------------------------------------
 
@@ -991,7 +992,7 @@ def main():
     rsdsCSKYTOT_RMSE.append(tmp_np.std())
 
     # Write to text file
-    filename=pdir+'rsdsCSKYTOT'+fsetup_txt+'_PR_PerfMetricsMN.txt'
+    filename=pdir / Path('rsdsCSKYTOT'+fsetup_txt+'_PR_PerfMetricsMN.txt')
     f = open(filename, 'w')
     # Col Headings
     f.write("%20s" % ''),
@@ -1007,7 +1008,7 @@ def main():
     if NO_MLmodels>2: 
         row_npa=np.arange(len(RowHeadingListSD))
         row_npa[-1]=row_npa[-1]+1
-        filename=pdir+'rsdsCSKYTOT'+fsetup_txt+'_PR_PerfMetricsSD.txt'
+        filename=pdir / Path('rsdsCSKYTOT'+fsetup_txt+'_PR_PerfMetricsSD.txt')
         f = open(filename, 'w')
         # Col Headings
         f.write("%20s" % ''),
@@ -1052,7 +1053,7 @@ def main():
     # (Could repeat for seasonal values?)
     # ------
     # Prediction on testing data ANN Mean (raw)
-    filename=pdir+'rsdsTOT'+fsetup_txt+'_PR_MEAN_ANNts'
+    filename=pdir / Path('rsdsTOT'+fsetup_txt+'_PR_MEAN_ANNts.png')
     fig, ax = plt.subplots(figsize=(FIGWIDTH,FIGHEIGHT), layout='constrained')
     ax.plot(xtimevec,CLIMyPR_longMxTOT.mean(axis=0), label='OBS CskyTot', color='cyan', linewidth=2, linestyle='-')	# OBS TOTAL clearsky
     ax.plot(xtimevec,CLIMxPR_longCSKY.mean(axis=0), label='OBS CskyDir', color='cyan', linewidth=1, linestyle='-')	# OBS DIRECT clearsky
@@ -1070,7 +1071,7 @@ def main():
     ax.set_ylim(bottom=-20, top=None)
     ax.legend(loc="upper right")
     plt.title('TOTAL '+model_name_list1+' '+bsize_txt+wlist_txt)
-    plt.savefig(filename+'.png') # saves figure to designated file path (do this before show plot, else will plot nothing to file)
+    plt.savefig(filename) # saves figure to designated file path (do this before show plot, else will plot nothing to file)
     plt.close('all') # plt.show()
     # -----------------------------------------------------
     # -----------------------------------------------------
@@ -1078,7 +1079,7 @@ def main():
     # (Could repeat for seasonal values?)
     # ------
     # Prediction on testing data ANN Mean
-    filename=pdir+'rsdsDIR'+fsetup_txt+'_PR_MEAN_ANNts'
+    filename=pdir / Path('rsdsDIR'+fsetup_txt+'_PR_MEAN_ANNts.png')
     fig, ax = plt.subplots(figsize=(FIGWIDTH,FIGHEIGHT), layout='constrained')
     ax.plot(xtimevec,CLIMxPR_longCSKY.mean(axis=0), label='OBS CskyDir', color='cyan', linewidth=1, linestyle='-')	# OBS DIRECT clearsky
     label_tmp='%8s' % 'MLR56'
@@ -1095,7 +1096,7 @@ def main():
     ax.set_ylim(bottom=-20, top=None)
     ax.legend(loc="upper right")
     plt.title('DIRECT '+model_name_list1+' '+bsize_txt+wlist_txt)
-    plt.savefig(filename+'.png') # saves figure to designated file path (do this before show plot, else will plot nothing to file)
+    plt.savefig(filename) # saves figure to designated file path (do this before show plot, else will plot nothing to file)
     plt.close('all') # plt.show()
     # -----------------------------------------------------
 
@@ -1131,7 +1132,7 @@ def main():
         #--------------------------------
         # TOTAL Plot Sample prediction and target
         # - AND include original predictand
-        filename=pdir+'Examples/'+'rsdsTOT'+fsetup_txt+'_PR_Day'+daynumtxt
+        filename=pdir / 'Examples' / Path('rsdsTOT'+fsetup_txt+'_PR_Day'+daynumtxt+'.png')
         fig, ax = plt.subplots(figsize=(FIGWIDTH,FIGHEIGHT), layout='constrained')
         ax.plot(xtime3HRvec,OBSxPR_shortTOT_wm2[daynum], label='Input 3HR Tot', color='black', linewidth=1, linestyle='--')	 # Prediction input
         ax.plot(xtimevec,CLIMyPR_longMxTOT[daynum], label='CskyTot', color='cyan', linewidth=2, linestyle='-')	       # clearsky Total
@@ -1149,12 +1150,12 @@ def main():
         ax.set_ylim(bottom=-20, top=None)
         ax.legend(loc="upper right")
         plt.title(site_name_P_txt+' '+yrS_txt_P+' Day '+datetxt+' '+bsize_txt+wlist_txt)
-        plt.savefig(filename+'.png') # saves figure to designated file path (do this before show plot, else will plot nothing to file)
+        plt.savefig(filename) # saves figure to designated file path (do this before show plot, else will plot nothing to file)
         plt.close('all') # plt.show()
         #-------------------------------
         # DIRECT Plot Sample prediction and target
         # - AND include original predictand
-        filename=pdir+'Examples/'+'rsdsDIR'+fsetup_txt+'_PR_Day'+daynumtxt
+        filename=pdir / 'Examples' / Path('rsdsDIR'+fsetup_txt+'_PR_Day'+daynumtxt+'.png')
         fig, ax = plt.subplots(figsize=(FIGWIDTH,FIGHEIGHT), layout='constrained')
         ax.plot(xtimevec,CLIMxPR_longCSKY[daynum], label='OBS CskyDir', color='cyan', linewidth=1, linestyle='-') # OBS clearsky Direct
         label_tmp='%8s' % 'MLR56' +', SD=' + '%5.1f' % OBSpredictionDIR_mlr56_wm2[daynum].std()
@@ -1170,13 +1171,13 @@ def main():
         ax.set_ylim(bottom=-20, top=None)
         ax.legend(loc="upper right")
         plt.title(site_name_P_txt+' DIR '+yrS_txt_P+' Day '+datetxt+' '+bsize_txt+wlist_txt)
-        plt.savefig(filename+'.png') # saves figure to designated file path (do this before show plot, else will plot nothing to file)
+        plt.savefig(filename) # saves figure to designated file path (do this before show plot, else will plot nothing to file)
         plt.close('all') # plt.show()
         #--------------------------------
         #--------------------------------
         # TOTAL Plot Sample prediction and target - MLR56
         # - AND include original predictand
-        filename=pdir+'Examples/'+'rsdsTOTmMLR56'+fsetup_txt+'_PR_Day'+daynumtxt
+        filename=pdir / 'Examples' / Path('rsdsTOTmMLR56'+fsetup_txt+'_PR_Day'+daynumtxt+'.png')
         fig, ax = plt.subplots(figsize=(FIGWIDTH,FIGHEIGHT), layout='constrained')
         for mm in range(NO_MLmodels):
             label_tmp='%8s' % ('ML'+model_name_list[mm])
@@ -1188,12 +1189,12 @@ def main():
         ax.set_ylim(bottom=None, top=None)
         ax.legend(loc="upper right")
         plt.title('TOT-MLR56 '+site_name_P_txt+' '+yrS_txt_P+' Day '+datetxt+' '+bsize_txt+wlist_txt)
-        plt.savefig(filename+'.png') # saves figure to designated file path (do this before show plot, else will plot nothing to file)
+        plt.savefig(filename) # saves figure to designated file path (do this before show plot, else will plot nothing to file)
         plt.close('all') # plt.show()
         #-------------------------------
         # DIRECT Plot Sample prediction and target - MLR56
         # - AND include original predictand
-        filename=pdir+'Examples/'+'rsdsDIRmMLR56'+fsetup_txt+'_PR_Day'+daynumtxt
+        filename=pdir / 'Examples' / Path('rsdsDIRmMLR56'+fsetup_txt+'_PR_Day'+daynumtxt+'.png')
         fig, ax = plt.subplots(figsize=(FIGWIDTH,FIGHEIGHT), layout='constrained')
         for mm in range(NO_MLmodels):
             label_tmp='%8s' % ('ML'+model_name_list[mm])
@@ -1205,7 +1206,7 @@ def main():
         ax.set_ylim(bottom=None, top=None)
         ax.legend(loc="upper right")
         plt.title('TOT-MLR56 '+site_name_P_txt+' DIR '+yrS_txt_P+' Day '+datetxt+' '+bsize_txt+wlist_txt)
-        plt.savefig(filename+'.png') # saves figure to designated file path (do this before show plot, else will plot nothing to file)
+        plt.savefig(filename) # saves figure to designated file path (do this before show plot, else will plot nothing to file)
         plt.close('all') # plt.show()
         #-------------------------------
 
@@ -1225,7 +1226,7 @@ def main():
         #--------------------------------
         # TOTAL Plot Sample prediction and target
         # - AND include original predictand
-        filename=pdir+'Examples/'+'rsdsTOT'+fsetup_txt+'_PR_1week'+daynumtxt
+        filename=pdir / 'Examples' / Path('rsdsTOT'+fsetup_txt+'_PR_1week'+daynumtxt+'.png')
         fig, ax = plt.subplots(figsize=(T2FIGWIDTH,FIGHEIGHT), layout='constrained')
         ax.plot(xtime3HRvec_1week,OBSxPR_shortTOT_wm2[daynum:(daynum+7)].flatten(), label='Input 3HR Tot', color='black', linewidth=1, linestyle='--')	 # Prediction input
         ax.plot(xtimevec_1week,CLIMyPR_longMxTOT[daynum:(daynum+7)].flatten(), label='CskyTot', color='cyan', linewidth=2, linestyle='-')	       # clearsky Total
@@ -1242,12 +1243,12 @@ def main():
         ax.set_ylim(bottom=-20, top=None)
         ax.legend(loc="upper right")
         plt.title(site_name_P_txt+' '+yrS_txt_P+' Week '+datetxt+' '+bsize_txt+wlist_txt)
-        plt.savefig(filename+'.png') # saves figure to designated file path (do this before show plot, else will plot nothing to file)
+        plt.savefig(filename) # saves figure to designated file path (do this before show plot, else will plot nothing to file)
         plt.close('all') # plt.show()
         #-------------------------------
         # DIRECT Plot Sample prediction and target
         # - AND include original predictand
-        filename=pdir+'Examples/'+'rsdsDIR'+fsetup_txt+'_PR_1week'+daynumtxt
+        filename=pdir / 'Examples' / Path('rsdsDIR'+fsetup_txt+'_PR_1week'+daynumtxt+'.png')
         fig, ax = plt.subplots(figsize=(T2FIGWIDTH,FIGHEIGHT), layout='constrained')	 # Prediction input
         ax.plot(xtimevec_1week,CLIMxPR_longCSKY[daynum:(daynum+7)].flatten(), label='OBS CskyDir', color='cyan', linewidth=1, linestyle='-') # OBS clearsky Direct
         label_tmp='%8s' % 'MLR56' +', SD=' + '%5.1f' % OBSpredictionDIR_mlr56_wm2[daynum:(daynum+7)].std() + ', WD='+ '%4.1f' % sp.stats.wasserstein_distance(OBSpredictionDIR_mlr56_wm2[daynum:(daynum+7)].flatten(), OBSyPR_targetDIR_wm2[daynum:(daynum+7)].flatten())
@@ -1262,13 +1263,13 @@ def main():
         ax.set_ylim(bottom=-20, top=None)
         ax.legend(loc="upper right")
         plt.title(site_name_P_txt+' DIR '+yrS_txt_P+' Week '+datetxt+' '+bsize_txt+wlist_txt)
-        plt.savefig(filename+'.png') # saves figure to designated file path (do this before show plot, else will plot nothing to file)
+        plt.savefig(filename) # saves figure to designated file path (do this before show plot, else will plot nothing to file)
         plt.close('all') # plt.show()
         #--------------------------------
         #--------------------------------
         # TOTAL Plot Sample prediction and target - MLR56
         # - AND include original predictand
-        filename=pdir+'Examples/'+'rsdsTOTmMLR56'+fsetup_txt+'_PR_1week'+daynumtxt
+        filename=pdir / 'Examples' / Path('rsdsTOTmMLR56'+fsetup_txt+'_PR_1week'+daynumtxt+'.png')
         fig, ax = plt.subplots(figsize=(T2FIGWIDTH,FIGHEIGHT), layout='constrained')
         for mm in range(NO_MLmodels):
             label_tmp='ML'+model_name_list[mm]
@@ -1280,12 +1281,12 @@ def main():
         ax.set_ylim(bottom=None, top=None)
         ax.legend(loc="upper right")
         plt.title('TOT-MLR56 '+site_name_P_txt+' '+yrS_txt_P+' Week '+datetxt+' '+bsize_txt+wlist_txt)
-        plt.savefig(filename+'.png') # saves figure to designated file path (do this before show plot, else will plot nothing to file)
+        plt.savefig(filename) # saves figure to designated file path (do this before show plot, else will plot nothing to file)
         plt.close('all') # plt.show()
         #-------------------------------
         # DIRECT Plot Sample prediction and target - MLR56
         # - AND include original predictand
-        filename=pdir+'Examples/'+'rsdsDIRmMLR56'+fsetup_txt+'_PR_1week'+daynumtxt
+        filename=pdir / 'Examples' / Path('rsdsDIRmMLR56'+fsetup_txt+'_PR_1week'+daynumtxt+'.png')
         fig, ax = plt.subplots(figsize=(T2FIGWIDTH,FIGHEIGHT), layout='constrained')
         for mm in range(NO_MLmodels):
             label_tmp='%8s' % ('ML'+model_name_list[mm])
@@ -1297,7 +1298,7 @@ def main():
         ax.set_ylim(bottom=None, top=None)
         ax.legend(loc="upper right")
         plt.title('TOT-MLR56 '+site_name_P_txt+' DIR '+yrS_txt_P+' Week '+datetxt+' '+bsize_txt+wlist_txt)
-        plt.savefig(filename+'.png') # saves figure to designated file path (do this before show plot, else will plot nothing to file)
+        plt.savefig(filename) # saves figure to designated file path (do this before show plot, else will plot nothing to file)
         plt.close('all') # plt.show()
         #-------------------------------
 

@@ -114,6 +114,7 @@ print("--------------")
 
 import sys
 import os
+from pathlib import Path
 import importlib
 import pandas as pd
 import numpy as np
@@ -144,7 +145,7 @@ import rsds_performance_metrics as rspm # PERFORMANCE METRIC FUNCTIONS
 # ----------------------------------------------------------------------------
 
 # DIRECTORY For Output Plots 
-OUT_DIR='results/rsds_ObsTraining/'
+OUT_DIR=Path('results/rsds_ObsTraining/')
 
 # ----------------------------------------------------------------------------
 def seed_worker(worker_id):
@@ -222,7 +223,7 @@ def main():
     bsize_txt='B'+str(batch_size) # bsize_txt+wlist_txt
 
     # Setup Output Directories
-    pdir = OUT_DIR + 'test'+str(train_test_case)+'_'+ model_name_list1 + '_' + bsize_txt + wlist_txt + '/' + location1  + '/'
+    pdir = OUT_DIR / Path( 'test'+str(train_test_case)+'_'+ model_name_list1 + '_' + bsize_txt + wlist_txt + '/' + location1  + '/')
     # Make directories if don't already exist
     if not os.path.exists(pdir): os.makedirs(pdir)
 
@@ -524,16 +525,16 @@ def main():
     # ============
 
     # Plot Loss Functions (separately and average of MSE for Total and MSE for Direct)
-    filename=pdir+'rsds'+fsetup_txt+'_ML'+model_name_list[0]+'_LossFn'+pnum_list[0]
-    plot_loss(loss_out[0:2,:], filepath=filename+'.png')
-    filename=pdir+'rsdsTOT'+fsetup_txt+'_ML'+model_name_list[0]+'_LossFn'+pnum_list[0]
-    plot_loss(loss_out[2:4,:], filepath=filename+'.png')
-    filename=pdir+'rsdsDIR'+fsetup_txt+'_ML'+model_name_list[0]+'_LossFn'+pnum_list[0]
-    plot_loss(loss_out[4:6,:], filepath=filename+'.png')
+    filename=pdir / Path('rsds'+fsetup_txt+'_ML'+model_name_list[0]+'_LossFn'+pnum_list[0]+'.png')
+    plot_loss(loss_out[0:2,:], filepath=filename)
+    filename=pdir / Path('rsdsTOT'+fsetup_txt+'_ML'+model_name_list[0]+'_LossFn'+pnum_list[0]+'.png')
+    plot_loss(loss_out[2:4,:], filepath=filename)
+    filename=pdir / Path('rsdsDIR'+fsetup_txt+'_ML'+model_name_list[0]+'_LossFn'+pnum_list[0]+'.png')
+    plot_loss(loss_out[4:6,:], filepath=filename)
 
     # Save ML Model
-    filename=pdir+'rsdsDIR'+fsetup_txt+'_ML'+model_name_list[0]+'_model'+pnum_list[0]
-    if save_model: torch.save(trained_model.state_dict(), filename+'.pth') # Optional: save the model
+    filename=pdir / Path('rsdsDIR'+fsetup_txt+'_ML'+model_name_list[0]+'_model'+pnum_list[0]+'.pth')
+    if save_model: torch.save(trained_model.state_dict(), filename) # Optional: save the model
 
     ## To look at weights of model, pause here and output:
     # pdb.set_trace()
@@ -576,7 +577,7 @@ def main():
 
     mcount=0
     #-------------------------
-    filename=pdir+'rsdsTOTnDIR'+fsetup_txt+'_TR_LossFn_TRPR_RMSE.txt'
+    filename=pdir / Path('rsdsTOTnDIR'+fsetup_txt+'_TR_LossFn_TRPR_RMSE.txt')
     f = open(filename, 'w')
 
     # TOTAL
@@ -789,7 +790,7 @@ def main():
     DIR_LIST1.append(rsdsDIR_DSD_WD)
 
     # Write to text file
-    filename=pdir+'rsdsTOTnDIR'+fsetup_txt+'_PR_PerfMetrics.txt'
+    filename=pdir / Path('rsdsTOTnDIR'+fsetup_txt+'_PR_PerfMetrics.txt')
     f = open(filename, 'w')
     # Col Headings
     f.write("%20s" % 'TOT'),
@@ -840,7 +841,7 @@ def main():
     FIGHEIGHT=6
 
     # -----------------------------------------------------
-    filename=pdir+'rsdsTOT_30MIN'+fsetup_txt+'_PR_target_MEANCSKYunsc_DAYtsMN'
+    filename=pdir / Path('rsdsTOT_30MIN'+fsetup_txt+'_PR_target_MEANCSKYunsc_DAYtsMN.png')
     fig, ax = plt.subplots(figsize=(FIGWIDTH,FIGHEIGHT), layout='constrained')
     ax.plot(ST_OBSyTR30MIN_rsds_total_max_est[0].mean(axis=1), color='black', label='OBS Smoothed')
     ax.plot(ST_OBSyTR30MIN_rsds_total_max_est[0].mean(axis=1)/maxFac, color='red', label='OBS Smoothed UnSc')
@@ -850,7 +851,7 @@ def main():
     plt.xlabel('Day')
     plt.ylabel('RSDS, W/m2')
     ax.set_ylim(bottom=0.0, top=400.0)
-    plt.savefig(filename+'.png') # saves figure to designated file path (do this before show plot, else will plot nothing to file)
+    plt.savefig(filename) # saves figure to designated file path (do this before show plot, else will plot nothing to file)
     plt.close('all') # plt.show() 
     
     ST_OBSyTR30MIN_rsds_total_max_estUS0=ST_OBSyTR30MIN_rsds_total_max_est[0]/maxFac
@@ -864,7 +865,7 @@ def main():
     print(ratioGT1.max())
 
     # -----------------------------------------------------
-    filename=pdir+'rsdsTOT_30MIN'+fsetup_txt+'_PR_target_MEANCSKY_DAYtsMN'
+    filename=pdir / Path('rsdsTOT_30MIN'+fsetup_txt+'_PR_target_MEANCSKY_DAYtsMN.png')
     fig, ax = plt.subplots(figsize=(FIGWIDTH,FIGHEIGHT), layout='constrained')
     ax.plot(ST_OBSyTR30MIN_rsds_total_max_est[0].mean(axis=1), color='black', label='OBS Smoothed')
     ax.plot(ST_OBSyPR_targetTOTALnLeap_MAX.mean(axis=1), color='gray', label='OBS Target')
@@ -873,11 +874,11 @@ def main():
     plt.xlabel('Day')
     plt.ylabel('RSDS, W/m2')
     ax.set_ylim(bottom=0.0, top=400.0)
-    plt.savefig(filename+'.png') # saves figure to designated file path (do this before show plot, else will plot nothing to file)
+    plt.savefig(filename) # saves figure to designated file path (do this before show plot, else will plot nothing to file)
     plt.close('all') # plt.show()  
 
     # -----------------------------------------------------
-    filename=pdir+'rsdsTOT_30MIN'+fsetup_txt+'_PR_mlr56_B5SUBsampleMEANCSKY_DAYtsMN'
+    filename=pdir / Path('rsdsTOT_30MIN'+fsetup_txt+'_PR_mlr56_B5SUBsampleMEANCSKY_DAYtsMN.png')
     fig, ax = plt.subplots(figsize=(FIGWIDTH,FIGHEIGHT), layout='constrained')
     ax.plot(ST_OBSyTR30MIN_rsds_total_max_est[0].mean(axis=1), color='black', label='OBS Smoothed')
     ax.plot(ST_OBSyPR_targetTOTALnLeap_MAX.mean(axis=1), color='gray', label='OBS Target')
@@ -888,7 +889,7 @@ def main():
     plt.xlabel('Day')
     plt.ylabel('RSDS, W/m2')
     ax.set_ylim(bottom=0.0, top=400.0)
-    plt.savefig(filename+'.png') # saves figure to designated file path (do this before show plot, else will plot nothing to file)
+    plt.savefig(filename) # saves figure to designated file path (do this before show plot, else will plot nothing to file)
     plt.close('all') # plt.show()  
 
     # -----------------------------------------------------
@@ -896,7 +897,7 @@ def main():
         OBSpredictionTOT_mltmp_wm2_nLeap=rsdp.fn_remove_29feb_array(OBSpredictionTOT_MLlist_wm2[mcount], yearP_LenList, ntsteps=48)
         OBSpredictionTOT_mltmp_wm2_CMAX=rsdp.fn_compute_timestep_day_max(OBSpredictionTOT_mltmp_wm2_nLeap, num_years=len(yearP_LenList), ntsteps=48, yrlen=365)
 
-        filename=pdir+'rsdsTOT_30MIN'+fsetup_txt+'_PR_ML'+model_name_list[mcount]+pnum_list[mcount]+'_B5SUBsampleMEANCSKY_DAYtsMN'
+        filename=pdir / Path('rsdsTOT_30MIN'+fsetup_txt+'_PR_ML'+model_name_list[mcount]+pnum_list[mcount]+'_B5SUBsampleMEANCSKY_DAYtsMN.png')
         fig, ax = plt.subplots(figsize=(FIGWIDTH,FIGHEIGHT), layout='constrained')
         ax.plot(ST_OBSyTR30MIN_rsds_total_max_est[0].mean(axis=1), color='black', label='OBS Smoothed')
         ax.plot(ST_OBSyPR_targetTOTALnLeap_MAX.mean(axis=1), color='gray', label='OBS Target')
@@ -907,7 +908,7 @@ def main():
         plt.xlabel('Day')
         plt.ylabel('RSDS, W/m2')
         ax.set_ylim(bottom=0.0, top=400.0)
-        plt.savefig(filename+'.png') # saves figure to designated file path (do this before show plot, else will plot nothing to file)
+        plt.savefig(filename) # saves figure to designated file path (do this before show plot, else will plot nothing to file)
         plt.close('all') # plt.show()
     # -----------------------------------------------------
 
@@ -927,7 +928,7 @@ def main():
     rsdsCSKYTOT_RMSE.append(rspm.RMSE_NPARRAY(OBSpredictionTOT_mltmp_wm2_CMAX.mean(axis=1)[Bratio <= 5], ST_OBSyPR_targetTOTALnLeap_MAX.mean(axis=1)[Bratio <= 5]))
 
     # Write to text file
-    filename=pdir+'rsdsCSKYTOT'+fsetup_txt+'_PR_PerfMetrics.txt'
+    filename=pdir / Path('rsdsCSKYTOT'+fsetup_txt+'_PR_PerfMetrics.txt')
     f = open(filename, 'w')
     # Col Headings
     f.write("%20s" % ''),
